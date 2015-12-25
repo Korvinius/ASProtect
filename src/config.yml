@@ -1,0 +1,7 @@
+protect: 
+  message: Эта стойка принадлежит %owner%
+group:
+  default: "5"
+  vip: "7"
+  supervip: "10"
+  premium: "15"

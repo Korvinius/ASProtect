@@ -1,0 +1,10 @@
+description: ASProtect
+main: net.wealth_mc.asprotect.ASProtect
+name: ASProtect
+version: 0.0.1
+website: "http://wealth-mc.net"
+author: Korvinius
+commands:
+  asprotect:
+    aliases: [asp, asprot]
+    usage: "/asprotect [args]"
