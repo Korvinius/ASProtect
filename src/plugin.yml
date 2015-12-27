@@ -1,7 +1,7 @@
 description: ASProtect
 main: net.wealth_mc.asprotect.ASProtect
 name: ASProtect
-version: 0.0.1
+version: 0.0.1/alpha
 website: "http://wealth-mc.net"
 author: Korvinius
 commands:

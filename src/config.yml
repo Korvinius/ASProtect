@@ -5,3 +5,4 @@ group:
   vip: "7"
   supervip: "10"
   premium: "15"
+unprotect: 20

@@ -22,17 +22,19 @@ public class ASProtect extends JavaPlugin {
 	public static Logger log;
 	public static String protectmessage;
 	public static Integer defaultgroup;
+	public static int delayunprotect;
 	public static File fileAS;
 	private static Map<String, Object> stands = new HashMap<String, Object>();
 	private static Map<String, Player> isplayerstand = new HashMap<String, Player>();
+	private static Map<Player, ASPLocation> isplayerasrmv = new HashMap<Player, ASPLocation>();
 	public static Map<String, Object> groups = new HashMap<String, Object>();
 	public static final String PERM_admin     = "asprotect.admin";
 	public static final String PERM_ignore    = "asprotect.ignore";
 	public static final String PERM_user      = "asprotect.user";
 	public static final String PERM_unlimite  = "asprotect.unlimite";
-	public static final String PERM_protect   = "asprotect.cmd.protect";
-	public static final String PERM_unprotect = "asprotect.cmd.unprotect";
-	public static final String PERM_info      = "asprotect.cmd.info";
+	public static final String PERM_protect   = "asprotect.protect";
+	public static final String PERM_unprotect = "asprotect.unprotect";
+	public static final String PERM_info      = "asprotect.info";
 	public static final String TAG = ChatColor.DARK_RED + "[" + ChatColor.GOLD + "ASprotect" 
 			+ ChatColor.DARK_RED + "] " + ChatColor.RESET;
 	
@@ -49,6 +51,7 @@ public class ASProtect extends JavaPlugin {
 		protectmessage = config.getString("protect.message");
 		groups = config.getConfigurationSection("group").getValues(false);
 		defaultgroup = stringToInt(config.getString("group.default"));
+		delayunprotect = config.getInt("unprotect");
 		
 		saveDefaultProtectArmorStand();
 		loadProtectArmorStand();
@@ -79,6 +82,8 @@ public class ASProtect extends JavaPlugin {
 		config = this.getConfig();
 		protectmessage = config.getString("protect.message");
 		groups = config.getConfigurationSection("group").getValues(false);
+		defaultgroup = stringToInt(config.getString("group.default"));
+		delayunprotect = config.getInt("unprotect");
 		loadProtectArmorStand();
 	}
 	public static boolean checkArmorStandProtect(ASPLocation asloc, Player player) {
@@ -214,6 +219,12 @@ public class ASProtect extends JavaPlugin {
 			Object player = entry.getValue();
 			log.info(strloc +": "+ player);
 		}
+	}
+	public static Map<Player, ASPLocation> getIsplayerasrmv() {
+		return isplayerasrmv;
+	}
+	public static void setIsplayerasrmv(Map<Player, ASPLocation> isplayerasrmv) {
+		ASProtect.isplayerasrmv = isplayerasrmv;
 	}
 
 }
