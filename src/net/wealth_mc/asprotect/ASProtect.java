@@ -134,7 +134,6 @@ public class ASProtect extends JavaPlugin {
 		Integer x = 0;
 		
 		for (Entry<String, Object> entry : groups.entrySet()){
-			log.info(entry.getKey() +": "+ entry.getValue());
 			if (entry.getKey().equals(group)) {
 				i = stringToInt(entry.getValue().toString());
 			}

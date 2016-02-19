@@ -14,9 +14,10 @@ public class ASPVault {
 	
 
 	public static void init() {
-        if (!checkVault()){
+        if (checkVault()){
             vault_perm = setupPermissions();            
-            ASProtect.log.info("Плагин Vault не обнаружен!");
+        }else{
+        	ASProtect.log.info("Плагин Vault не обнаружен!");
         }
     }
     private static boolean checkVault(){

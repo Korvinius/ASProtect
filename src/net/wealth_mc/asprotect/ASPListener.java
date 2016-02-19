@@ -60,7 +60,7 @@ public class ASPListener implements Listener {
 		ASPLocation asloc = new ASPLocation(loc.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 		if (ASProtect.checkArmorStandProtect(asloc, player)) {
 			event.setCancelled(true);
-			if (player.getItemInHand().getType() == Material.BONE) {
+			if (player !=null && player.getItemInHand().getType() == Material.BONE) {
 			new ASPRunnRmv(player, asloc);
 		}
 			return;
