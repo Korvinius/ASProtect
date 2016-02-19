@@ -1,9 +1,7 @@
 package net.wealth_mc.asprotect;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -24,9 +22,11 @@ public class ASPListener implements Listener {
 	
 	@EventHandler
 	public void onPlayerInteractEvent(PlayerInteractEvent event){
-		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-		if (event.getBlockFace() != BlockFace.UP) return;
-		new ASPRunnRclick(event);
+		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+			if (event.getBlockFace() == BlockFace.UP) {
+				new ASPRunnRclick(event);
+			}
+		}
 	}
 	
 	@EventHandler
@@ -44,25 +44,10 @@ public class ASPListener implements Listener {
 	
 	@EventHandler
 	public void onArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
-		checkArmorStandManipulate(event);
-	}
-
-	private void checkArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
 		Location loc = event.getRightClicked().getEyeLocation();
 		Player player = event.getPlayer();
-		String owner = null;
-		ASPLocation asloc = new ASPLocation(loc.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-		
-		Map<String, Object> stands = ASProtect.getStands();
-		for (Entry<String, Object> entry : stands.entrySet()){
-			if(entry.getKey().equals(asloc.toString())) {
-				
-				owner = (String) entry.getValue();
-				if (owner.equals(player.getName().toLowerCase())) return;
-				if (player.hasPermission(ASProtect.PERM_admin)) return;
-			}
-		}
-		event.setCancelled(true);
+		ASPLocation asloc = new ASPLocation(loc.getWorld(), loc.getBlockX(), loc.getBlockY()-1, loc.getBlockZ());
+		if (ASProtect.checkArmorStandInteract(asloc, player)) event.setCancelled(true);
 	}
 
 	private void checkDamageArmorStand(EntityDamageByEntityEvent event) {
@@ -75,7 +60,10 @@ public class ASPListener implements Listener {
 		ASPLocation asloc = new ASPLocation(loc.getWorld(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 		if (ASProtect.checkArmorStandProtect(asloc, player)) {
 			event.setCancelled(true);
+			if (player.getItemInHand().getType() == Material.BONE) {
+			new ASPRunnRmv(player, asloc);
+		}
 			return;
-		}	
+		}
 	}
 }

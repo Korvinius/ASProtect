@@ -3,11 +3,13 @@ package net.wealth_mc.asprotect;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -20,23 +22,16 @@ public class ASProtect extends JavaPlugin {
 	private ASPCommand asprotect;
 	
 	public static Logger log;
-	public static String protectmessage;
+	public static String tag;
 	public static Integer defaultgroup;
-	public static int delayunprotect;
 	public static File fileAS;
 	private static Map<String, Object> stands = new HashMap<String, Object>();
 	private static Map<String, Player> isplayerstand = new HashMap<String, Player>();
 	private static Map<Player, ASPLocation> isplayerasrmv = new HashMap<Player, ASPLocation>();
 	public static Map<String, Object> groups = new HashMap<String, Object>();
 	public static final String PERM_admin     = "asprotect.admin";
-	public static final String PERM_ignore    = "asprotect.ignore";
-	public static final String PERM_user      = "asprotect.user";
-	public static final String PERM_unlimite  = "asprotect.unlimite";
 	public static final String PERM_protect   = "asprotect.protect";
 	public static final String PERM_unprotect = "asprotect.unprotect";
-	public static final String PERM_info      = "asprotect.info";
-	public static final String TAG = ChatColor.DARK_RED + "[" + ChatColor.GOLD + "ASprotect" 
-			+ ChatColor.DARK_RED + "] " + ChatColor.RESET;
 	
 	@Override
 	public void onEnable() {
@@ -48,10 +43,9 @@ public class ASProtect extends JavaPlugin {
 		log.info(fileAS.toString());
 		
 		config = this.getConfig();
-		protectmessage = config.getString("protect.message");
 		groups = config.getConfigurationSection("group").getValues(false);
 		defaultgroup = stringToInt(config.getString("group.default"));
-		delayunprotect = config.getInt("unprotect");
+		tag = toStringColor(config.getString("PluginName"));
 		
 		saveDefaultProtectArmorStand();
 		loadProtectArmorStand();
@@ -80,27 +74,30 @@ public class ASProtect extends JavaPlugin {
 	public void reloadConfiguration() {
 		this.reloadConfig();
 		config = this.getConfig();
-		protectmessage = config.getString("protect.message");
 		groups = config.getConfigurationSection("group").getValues(false);
 		defaultgroup = stringToInt(config.getString("group.default"));
-		delayunprotect = config.getInt("unprotect");
 		loadProtectArmorStand();
+	}
+	public static boolean checkPlayerRemoveAS(Player player) {
+		for (Entry<Player, ASPLocation> entry : isplayerasrmv.entrySet()){
+			if (entry.getKey().equals(player)) return true;
+		}
+		return false;
 	}
 	public static boolean checkArmorStandProtect(ASPLocation asloc, Player player) {
 		for (Entry<String, Object> entry : stands.entrySet()){
 			if(entry.getKey().equals(asloc.toString())) {
 				if (player == null) return true;
 				String owner = (String) entry.getValue();
-				String message1 = protectmessage.replace("%owner%", owner);
 				if (owner.equals(player.getName().toLowerCase())) {
-					player.sendMessage(TAG + ChatColor.DARK_RED + message1);
+					if (player.getItemInHand().getType() != Material.BONE) {
+						player.sendMessage(tag + ChatColor.AQUA
+								+ " Эта стойка защищена вами, чтобы снять защиту ударьте по стойке костью");
+					}
 					return true;
 				}
-				if (player.hasPermission(PERM_ignore)) {
-					player.sendMessage(TAG + ChatColor.DARK_RED + message1);
-					return true;
-				}
-				player.sendMessage(TAG + ChatColor.DARK_RED + message1);
+				player.sendMessage(tag + ChatColor.DARK_RED
+						+ " Эта стойка защищена, владелец стойки: " + ChatColor.AQUA + owner);
 				return true;
 				
 			}
@@ -108,11 +105,36 @@ public class ASProtect extends JavaPlugin {
 		return false;
 	}
 
+	public static boolean checkArmorStandInteract(ASPLocation asloc, Player player) {
+//		printProtectArmorStand();
+//		log.info("Interact: " + asloc);
+		for (Entry<String, Object> entry : stands.entrySet()){
+			if(entry.getKey().equals(asloc.toString())) {
+				String owner = (String) entry.getValue();
+				if (owner.equals(player.getName().toLowerCase())) {
+					player.sendMessage(tag + ChatColor.YELLOW + " Это ваша стойка");
+					return false;
+				}
+				if (player.hasPermission(PERM_admin)) {
+					player.sendMessage(tag + ChatColor.YELLOW + " Эта стойка принадлежит: "
+							 + ChatColor.GOLD + owner);
+					return false;
+				}
+				player.sendMessage(tag + ChatColor.DARK_RED + " Это не Ваша стойка");
+				return true;
+			}
+		}
+		player.sendMessage(tag + ChatColor.AQUA + " Эта стойка не защищена");
+		return false;
+	}
+	
 	public static boolean checkCroupStands(Player player) {
 		String group = ASPVault.getPrimaryGroup(player);
-		int i = 0;
-		int x = 0;
+		Integer i = 0;
+		Integer x = 0;
+		
 		for (Entry<String, Object> entry : groups.entrySet()){
+			log.info(entry.getKey() +": "+ entry.getValue());
 			if (entry.getKey().equals(group)) {
 				i = stringToInt(entry.getValue().toString());
 			}
@@ -133,13 +155,17 @@ public class ASProtect extends JavaPlugin {
 		return isplayerstand;
 	}
 
-	public synchronized static void isPlayerStand(String name, Player player, boolean put) {
+	public static void isPlayerStand(String name, Player player, boolean put) {
 		if (put) {
 			isplayerstand.put(name, player);
 			return;
 		}else {
-			
-			isplayerstand.clear();
+			for(Iterator<Map.Entry<String, Player>> it = isplayerstand.entrySet().iterator(); it.hasNext(); ) {
+				Entry<String, Player> entry = it.next();
+				if(entry.getKey().equals(name)) {
+					it.remove();
+				}
+			}
 		}
 	}
 
@@ -147,9 +173,10 @@ public class ASProtect extends JavaPlugin {
 		if (add) {
 			stands.put(loc.toString(), player.getName().toLowerCase());
 		}else {
-			for(Entry<String, Object> entry : stands.entrySet()) {
+			for(Iterator<Map.Entry<String, Object>> it = stands.entrySet().iterator(); it.hasNext(); ) {
+				Entry<String, Object> entry = it.next();
 				if(entry.getKey().equals(loc.toString())) {
-					stands.remove(entry);
+					it.remove();
 				}
 			}
 		}
@@ -211,8 +238,11 @@ public class ASProtect extends JavaPlugin {
 			e.printStackTrace();
 		}
 	}
-	
-// ****************
+
+	public static String toStringColor(String input) {
+		    return ChatColor.translateAlternateColorCodes('&', input);
+	}
+
 	public static void printProtectArmorStand() {
 		for (Entry<String, Object> entry : stands.entrySet()){
 			String strloc = entry.getKey();
@@ -220,11 +250,4 @@ public class ASProtect extends JavaPlugin {
 			log.info(strloc +": "+ player);
 		}
 	}
-	public static Map<Player, ASPLocation> getIsplayerasrmv() {
-		return isplayerasrmv;
-	}
-	public static void setIsplayerasrmv(Map<Player, ASPLocation> isplayerasrmv) {
-		ASProtect.isplayerasrmv = isplayerasrmv;
-	}
-
 }

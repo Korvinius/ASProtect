@@ -33,7 +33,6 @@ public class ASPRunnSpawn implements Runnable {
 
 	@Override
 	public void run() {
-		ASProtect.log.info("X1.1. ASPLocation loc: " + loc);
 		player = checkPlayerIsNull(name);
 		if (player == null) {
 			try {
@@ -60,16 +59,21 @@ public class ASPRunnSpawn implements Runnable {
             	ASPLocation loc2 = new ASPLocation(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
             	if (loc.equals(loc2)) {
             		if (!ASProtect.checkCroupStands(player)
-            				&& (!player.hasPermission(ASProtect.PERM_admin) 
-            						|| !player.hasPermission(ASProtect.PERM_ignore))) {
-            			player.sendMessage(ASProtect.TAG + ChatColor.DARK_RED 
+            				&& !player.hasPermission(ASProtect.PERM_admin)) {
+            			player.sendMessage(ASProtect.tag + ChatColor.DARK_AQUA 
             					+ " стойка не защищена, "
             					+ "вы уже установили максимально-возможное, для вашего статуса, "
             					+ "количество защищенных стоек");
             			return;
-            		}       
+            		}
+            		if (!player.hasPermission(ASProtect.PERM_protect)) {
+            			player.sendMessage(ASProtect.tag + ChatColor.DARK_AQUA 
+            					+ " стойка не защищена, "
+            					+ "у вас нет прав на защиту стоек");
+            			return;
+            		}
             		ASProtect.addOrRemoveProtectArmorStand(loc, player, true);
-            		player.sendMessage(ASProtect.TAG + ChatColor.DARK_AQUA 
+            		player.sendMessage(ASProtect.tag + ChatColor.DARK_AQUA 
             				+ " вы установили защищенную стойку для брони");
             	}
             }

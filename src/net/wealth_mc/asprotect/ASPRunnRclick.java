@@ -26,7 +26,6 @@ public class ASPRunnRclick implements Runnable {
 	public void run() {
 		Material hand = player.getItemInHand().getType();
 		if (hand != Material.AIR && hand != Material.ARMOR_STAND) return;
-		ASProtect.log.info("X2.1. Клик по блоку: " + player.getName() + " - " + loc.toString());
 		ASProtect.isPlayerStand(name, player, true);
 		try {
 			Thread.sleep(50);
